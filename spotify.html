@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Duy Thái Music - Dark Mode</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: #121212;
+      color: #fff;
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: #000;
+      padding: 20px;
+    }
+
+    .sidebar h2 {
+      color: #1db954;
+      margin-bottom: 20px;
+    }
+
+    .sidebar a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      margin: 10px 0;
+      padding: 8px;
+      border-radius: 5px;
+    }
+
+    .sidebar a:hover {
+      background-color: #1db95433;
+    }
+
+    .main {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #181818;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .login-form input {
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+      margin-right: 5px;
+    }
+
+    .login-form button {
+      background-color: #1db954;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .song-card {
+      background-color: #282828;
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .song-card h3 {
+      color: #1db954;
+    }
+
+    .like-btn {
+      background: transparent;
+      border: 2px solid #1db954;
+      color: #1db954;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .like-btn.liked {
+      background-color: #1db954;
+      color: #000;
+    }
+
+    .comment-box {
+      margin-top: 20px;
+    }
+
+    .comment-box textarea {
+      width: 100%;
+      height: 60px;
+      border-radius: 10px;
+      padding: 10px;
+      resize: none;
+      border: none;
+    }
+
+    .comment-box button {
+      background-color: #1db954;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 5px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .comments {
+      margin-top: 15px;
+    }
+
+    .comment {
+      background: #333;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .profile {
+      margin-top: 30px;
+      padding: 20px;
+      background: #202020;
+      border-radius: 15px;
+    }
+
+    .profile h3 {
+      color: #1db954;
+    }
+
+    .stat {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>🎵 DuyThái Music</h2>
+    <a href="#">Trang chủ</a>
+    <a href="#">Playlist</a>
+    <a href="#">Yêu thích</a>
+    <a href="#">Cài đặt</a>
+  </div>
+
+  <div class="main">
+    <div class="header">
+      <div class="login-form" id="loginForm">
+        <input type="text" id="username" placeholder="Tên bạn..." />
+        <button onclick="login()">Đăng nhập</button>
+      </div>
+      <div id="userGreeting" style="display:none;">
+        Xin chào, <span id="displayName"></span> 👋
+      </div>
+    </div>
+
+    <div class="song-card">
+      <h3>🎧 Thay Thế ft. Dâu Bơ - Vì Ai Bị?</h3>
+      <iframe 
+        allow="autoplay" 
+        width="100%" 
+        height="166" 
+        style="border-radius:12px; margin-top: 10px;"
+        src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/kh-ng-nguy-n-234009118/thay-the-ft-dau-boi-vi-ai-bi&color=%231db954&auto_play=false&show_comments=true&show_user=true">
+      </iframe>
+
+      <button class="like-btn" onclick="toggleLike()">❤️ Thích</button>
+
+      <div class="comment-box">
+        <textarea id="commentText" placeholder="Viết bình luận..."></textarea>
+        <button onclick="addComment()">💬 Gửi bình luận</button>
+      </div>
+
+      <div class="comments" id="commentList"></div>
+    </div>
+
+    <div class="profile" id="profileBox" style="display: none;">
+      <h3>👤 Hồ sơ người dùng</h3>
+      <div class="stat">Tên: <span id="profileName"></span></div>
+      <div class="stat">❤️ Số bài đã like: <span id="likeCount">0</span></div>
+      <div class="stat">💬 Số bình luận: <span id="commentCount">0</span></div>
+    </div>
+  </div>
+
+  <script>
+    let liked = false;
+    let comments = [];
+
+    function login() {
+      const name = document.getElementById('username').value.trim();
+      if (name) {
+        localStorage.setItem('username', name);
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('userGreeting').style.display = 'block';
+        document.getElementById('displayName').textContent = name;
+        document.getElementById('profileName').textContent = name;
+        document.getElementById('profileBox').style.display = 'block';
+      }
+    }
+
+    function toggleLike() {
+      liked = !liked;
+      const btn = document.querySelector('.like-btn');
+      btn.classList.toggle('liked');
+      btn.textContent = liked ? '💚 Đã thích' : '❤️ Thích';
+      document.getElementById('likeCount').textContent = liked ? 1 : 0;
+    }
+
+    function addComment() {
+      const text = document.getElementById('commentText').value.trim();
+      if (text !== '') {
+        comments.push(text);
+        document.getElementById('commentText').value = '';
+        updateComments();
+      }
+    }
+
+    function updateComments() {
+      const commentList = document.getElementById('commentList');
+      commentList.innerHTML = '';
+      comments.forEach(comment => {
+        const div = document.createElement('div');
+        div.className = 'comment';
+        div.textContent = comment;
+        commentList.appendChild(div);
+      });
+      document.getElementById('commentCount').textContent = comments.length;
+    }
+
+    window.onload = () => {
+      const name = localStorage.getItem('username');
+      if (name) {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('userGreeting').style.display = 'block';
+        document.getElementById('displayName').textContent = name;
+        document.getElementById('profileName').textContent = name;
+        document.getElementById('profileBox').style.display = 'block';
+      }
+    };
+  </script>
+</body>
+</html>
